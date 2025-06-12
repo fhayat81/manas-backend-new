@@ -15,9 +15,13 @@ const app = express();
 // Configure multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-// CORS configuration - open to all origins
+// CORS configuration - allow frontend domain
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://manas2.netlify.app', // Add your frontend domain here
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -32,11 +36,9 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Add logging middleware
+// Add logging middleware (remove sensitive data)
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
   next();
 });
 
