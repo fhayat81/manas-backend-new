@@ -22,6 +22,17 @@ const register = async (req, res) => {
       children_count
     } = req.body;
 
+    console.log('Registration attempt:', {
+      username,
+      email,
+      age,
+      gender,
+      marital_status,
+      education,
+      location,
+      children_count
+    });
+
     // Check if user already exists
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
@@ -55,6 +66,7 @@ const register = async (req, res) => {
     });
 
     await user.save();
+    console.log('User saved successfully:', user._id);
 
     // Generate and send OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -67,9 +79,11 @@ const register = async (req, res) => {
     });
 
     await otpDoc.save();
+    console.log('OTP saved successfully');
     
     try {
       await sendOTPEmail(email, otp);
+      console.log('OTP email sent successfully');
       res.status(201).json({ 
         message: 'Registration successful. Please check your email for verification code.',
         userId: user._id,
@@ -77,14 +91,35 @@ const register = async (req, res) => {
       });
     } catch (emailError) {
       console.error('Failed to send OTP email:', emailError);
+      // Don't fail the registration if email fails - just log the error
+      console.log('Registration successful but email service failed. User ID:', user._id);
       res.status(201).json({ 
-        message: 'Registration successful. Please contact support for email verification.',
+        message: 'Registration successful! Please contact support for email verification.',
         userId: user._id,
-        email: user.email
+        email: user.email,
+        note: 'Email verification will be handled by support team'
       });
     }
   } catch (error) {
     console.error('Registration error:', error);
+    
+    // Provide more specific error messages
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: validationErrors 
+      });
+    }
+    
+    if (error.code === 11000) {
+      // Duplicate key error
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        message: `${field} already exists` 
+      });
+    }
+    
     res.status(500).json({ message: 'Server error' });
   }
 };

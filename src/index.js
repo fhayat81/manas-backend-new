@@ -72,6 +72,30 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Database test endpoint
+app.get('/test-db', async (req, res) => {
+  try {
+    const dbStatus = mongoose.connection.readyState;
+    const statusMap = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    };
+    
+    res.status(200).json({ 
+      status: 'ok',
+      database: statusMap[dbStatus] || 'unknown',
+      readyState: dbStatus
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error',
+      message: error.message 
+    });
+  }
+});
+
 // MongoDB connection options optimized for serverless
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/manas';
 const MONGODB_OPTIONS = {
@@ -94,9 +118,12 @@ const connectDB = async () => {
       return;
     }
 
+    console.log('Attempting to connect to MongoDB...');
+    console.log('MongoDB URI:', MONGODB_URI ? 'Set' : 'Not set');
+
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URI, MONGODB_OPTIONS);
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB successfully');
 
     // Handle connection events
     mongoose.connection.on('error', (err) => {
@@ -121,6 +148,7 @@ const connectDB = async () => {
 
   } catch (error) {
     console.error('MongoDB connection error:', error);
+    console.error('Please check your MONGODB_URI environment variable');
     process.exit(1);
   }
 };

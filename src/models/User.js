@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-// Define allowed values for enums
-const GENDERS = ['male', 'female', 'other'];
-const MARITAL_STATUSES = ['single', 'married', 'divorcee', 'widow'];
-const EDUCATIONS = ['none', 'high school' , 'bachelor', 'master', 'phd'];
+// Define allowed values for enums - match the validation schema exactly
+const GENDERS = ['male', 'female'];
+const MARITAL_STATUSES = ['divorcee', 'widow'];
+const EDUCATIONS = ['none', 'primary school', 'high school', 'bachelor\'s', 'master\'s', 'phd'];
 
 // Adjust these arrays above to match your actual allowed values if needed
 
