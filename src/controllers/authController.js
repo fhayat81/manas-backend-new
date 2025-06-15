@@ -9,7 +9,6 @@ const { registerSchema, loginSchema, verifyOTPSchema } = require('../validations
 const register = async (req, res) => {
   try {
     const {
-      username,
       full_name,
       email,
       password,
@@ -18,30 +17,31 @@ const register = async (req, res) => {
       gender,
       marital_status,
       education,
+      profession,
+      phone_number,
+      interests_hobbies,
+      brief_personal_description,
       location,
       children_count
     } = req.body;
 
     console.log('Registration attempt:', {
-      username,
       email,
       age,
       gender,
       marital_status,
       education,
+      profession,
+      phone_number,
       location,
       children_count
     });
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { username }] 
-    });
+    // Check if user already exists (only by email now)
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ 
-        message: existingUser.email === email ? 
-          'Email already registered' : 
-          'Username already taken' 
+      return res.status(400).json({
+        message: 'Email already registered'
       });
     }
 
@@ -51,7 +51,6 @@ const register = async (req, res) => {
 
     // Create new user
     const user = new User({
-      username,
       full_name,
       email,
       password: hashedPassword,
@@ -60,6 +59,10 @@ const register = async (req, res) => {
       gender,
       marital_status,
       education,
+      profession,
+      phone_number,
+      interests_hobbies,
+      brief_personal_description,
       location,
       children_count,
       is_verified: false
@@ -114,9 +117,9 @@ const register = async (req, res) => {
     
     if (error.code === 11000) {
       // Duplicate key error
-      const field = Object.keys(error.keyPattern)[0];
+      // Assuming email is the only unique field now for user identification at registration
       return res.status(400).json({ 
-        message: `${field} already exists` 
+        message: 'Email already exists' 
       });
     }
     
@@ -129,12 +132,9 @@ const login = async (req, res) => {
   try {
     const { username_or_email, password } = req.body;
 
-    // Check if user exists
+    // Check if user exists (only by email now)
     const user = await User.findOne({
-      $or: [
-        { email: username_or_email },
-        { username: username_or_email }
-      ]
+      email: username_or_email
     });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -153,7 +153,7 @@ const login = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, email: user.email }, // Remove username from payload
       process.env.JWT_SECRET || 'your_jwt_secret',
       { expiresIn: '7d' }
     );
@@ -162,13 +162,16 @@ const login = async (req, res) => {
       token,
       user: {
         id: user._id,
-        username: user.username,
         full_name: user.full_name,
         email: user.email,
         age: user.age,
         gender: user.gender,
         marital_status: user.marital_status,
         education: user.education,
+        profession: user.profession,
+        phone_number: user.phone_number,
+        interests_hobbies: user.interests_hobbies,
+        brief_personal_description: user.brief_personal_description,
         location: user.location,
         children_count: user.children_count,
         profile_photo: user.profile_photo,

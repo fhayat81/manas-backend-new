@@ -2,14 +2,13 @@ const { z } = require('zod');
 const { Gender, MaritalStatus, Education } = require('../types');
 
 const registerSchema = z.object({
-  username: z.string().min(3).max(30),
   full_name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
   profile_photo: z.string().optional(),
   age: z.number().min(18),
   gender: z.enum([Gender.MALE, Gender.FEMALE]),
-  marital_status: z.enum([MaritalStatus.DIVORCEE, MaritalStatus.WIDOW]),
+  marital_status: z.enum([MaritalStatus.DIVORCEE, MaritalStatus.WIDOW, MaritalStatus.SINGLE]),
   education: z.enum([
     Education.NONE,
     Education.PRIMARY_SCHOOL,
@@ -18,8 +17,11 @@ const registerSchema = z.object({
     Education.MASTERS,
     Education.PHD,
   ]),
+  profession: z.string().min(1),
+  phone_number: z.string().min(1),
+  interests_hobbies: z.string().optional(),
+  brief_personal_description: z.string().optional(),
   location: z.object({
-    address: z.string(),
     city: z.string(),
     country: z.string(),
   }),
@@ -39,12 +41,11 @@ const verifyOTPSchema = z.object({
 const updateUserSchema = registerSchema.partial();
 
 const updateProfileSchema = z.object({
-  username: z.string().min(3).max(30).optional(),
   full_name: z.string().min(1).optional(),
   email: z.string().email().optional(),
   age: z.number().min(18).optional(),
   gender: z.enum([Gender.MALE, Gender.FEMALE]).optional(),
-  marital_status: z.enum([MaritalStatus.DIVORCEE, MaritalStatus.WIDOW]).optional(),
+  marital_status: z.enum([MaritalStatus.DIVORCEE, MaritalStatus.WIDOW, MaritalStatus.SINGLE]).optional(),
   education: z.enum([
     Education.NONE,
     Education.PRIMARY_SCHOOL,
@@ -53,10 +54,13 @@ const updateProfileSchema = z.object({
     Education.MASTERS,
     Education.PHD,
   ]).optional(),
+  profession: z.string().min(1).optional(),
+  phone_number: z.string().min(1).optional(),
+  interests_hobbies: z.string().optional(),
+  brief_personal_description: z.string().optional(),
   location: z.object({
-    address: z.string(),
-    city: z.string(),
-    country: z.string(),
+    city: z.string().optional(),
+    country: z.string().optional(),
   }).optional(),
   children_count: z.number().min(0).optional(),
   profile_photo: z.string().optional(),

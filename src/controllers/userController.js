@@ -111,14 +111,17 @@ const updateProfile = async (req, res) => {
 
     // Update fields if present
     const fieldsToUpdate = [
-      'username',
       'full_name',
       'email',
       'age',
       'gender',
       'marital_status',
       'education',
-      'children_count'
+      'children_count',
+      'profession',
+      'phone_number',
+      'interests_hobbies',
+      'brief_personal_description'
     ];
 
     let hasUpdates = false;
@@ -140,7 +143,6 @@ const updateProfile = async (req, res) => {
         new: updateData.location
       });
       user.location = {
-        address: updateData.location.address || (user.location && user.location.address),
         city: updateData.location.city || (user.location && user.location.city),
         country: updateData.location.country || (user.location && user.location.country)
       };

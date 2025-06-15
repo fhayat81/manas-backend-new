@@ -3,19 +3,12 @@ const { Schema } = mongoose;
 
 // Define allowed values for enums - match the validation schema exactly
 const GENDERS = ['male', 'female'];
-const MARITAL_STATUSES = ['divorcee', 'widow'];
+const MARITAL_STATUSES = ['divorcee', 'widow', 'single'];
 const EDUCATIONS = ['none', 'primary school', 'high school', 'bachelor\'s', 'master\'s', 'phd'];
 
 // Adjust these arrays above to match your actual allowed values if needed
 
 const userSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    minlength: 3,
-    maxlength: 30
-  },
   full_name: {
     type: String,
     required: true
@@ -52,11 +45,21 @@ const userSchema = new Schema({
     enum: EDUCATIONS,
     required: true
   },
+  profession: {
+    type: String,
+    required: true
+  },
+  phone_number: {
+    type: String,
+    required: true
+  },
+  interests_hobbies: {
+    type: String
+  },
+  brief_personal_description: {
+    type: String
+  },
   location: {
-    address: {
-      type: String,
-      required: true
-    },
     city: {
       type: String,
       required: true

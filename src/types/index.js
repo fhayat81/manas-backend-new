@@ -6,7 +6,8 @@ const Gender = Object.freeze({
 
 const MaritalStatus = Object.freeze({
   DIVORCEE: "divorcee",
-  WIDOW: "widow"
+  WIDOW: "widow",
+  SINGLE: "single"
 });
 
 const Education = Object.freeze({
@@ -21,14 +22,12 @@ const Education = Object.freeze({
 // JSDoc type hints (optional, for editor intellisense)
 /**
  * @typedef {Object} Location
- * @property {string} address
  * @property {string} city
  * @property {string} country
  */
 
 /**
  * @typedef {Object} User
- * @property {string} username
  * @property {string} full_name
  * @property {string} email
  * @property {string} password
@@ -37,6 +36,10 @@ const Education = Object.freeze({
  * @property {string} gender
  * @property {string} marital_status
  * @property {string} education
+ * @property {string} profession
+ * @property {string} phone_number
+ * @property {string} [interests_hobbies]
+ * @property {string} [brief_personal_description]
  * @property {Location} location
  * @property {number} children_count
  * @property {boolean} is_verified
@@ -55,7 +58,6 @@ const Education = Object.freeze({
 /**
  * @typedef {Object} JwtPayload
  * @property {string} userId
- * @property {string} username
  * @property {string} email
  */
 
