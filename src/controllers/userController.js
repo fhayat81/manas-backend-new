@@ -208,10 +208,138 @@ const updateProfilePicture = async (req, res) => {
   }
 };
 
+// Get Profile by ID (for viewing other profiles)
+const getProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const currentUserId = req.user._id;
+
+    // Don't allow users to view their own profile through this endpoint
+    if (id === currentUserId.toString()) {
+      return res.status(403).json({ message: 'Use /profile endpoint to view your own profile' });
+    }
+
+    const profile = await User.findById(id)
+      .select('-password -email -phone_number') // Exclude sensitive information
+      .lean();
+
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    res.json(profile);
+  } catch (error) {
+    console.error('Get profile by ID error:', error);
+    res.status(500).json({ message: 'Failed to fetch profile' });
+  }
+};
+
+// Get All Profiles (for view profiles page)
+const getAllProfiles = async (req, res) => {
+  try {
+    const currentUserId = req.user._id;
+    
+    // Get query parameters for filtering
+    const { 
+      location, 
+      ageRange, 
+      profession, 
+      search,
+      gender,
+      marital_status,
+      education,
+      limit = 50,
+      page = 1
+    } = req.query;
+
+    // Build filter object
+    const filter = {
+      _id: { $ne: currentUserId } // Exclude current user
+    };
+
+    // Location filter
+    if (location) {
+      filter['location.city'] = { $regex: location, $options: 'i' };
+    }
+
+    // Age range filter
+    if (ageRange) {
+      const [minAge, maxAge] = ageRange.split('-').map(Number);
+      if (maxAge) {
+        filter.age = { $gte: minAge, $lte: maxAge };
+      } else {
+        filter.age = { $gte: minAge };
+      }
+    }
+
+    // Profession filter
+    if (profession) {
+      filter.profession = { $regex: profession, $options: 'i' };
+    }
+
+    // Gender filter
+    if (gender) {
+      filter.gender = gender;
+    }
+
+    // Marital status filter
+    if (marital_status) {
+      filter.marital_status = marital_status;
+    }
+
+    // Education filter
+    if (education) {
+      filter.education = education;
+    }
+
+    // Search filter (searches across multiple fields)
+    if (search) {
+      const searchRegex = { $regex: search, $options: 'i' };
+      filter.$or = [
+        { full_name: searchRegex },
+        { profession: searchRegex },
+        { interests_hobbies: searchRegex },
+        { brief_personal_description: searchRegex },
+        { 'location.city': searchRegex },
+        { 'location.country': searchRegex }
+      ];
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Fetch profiles with filters
+    const profiles = await User.find(filter)
+      .select('-password -email -phone_number') // Exclude sensitive information
+      .sort({ created_at: -1 }) // Sort by newest first
+      .limit(parseInt(limit))
+      .skip(skip);
+
+    // Get total count for pagination
+    const totalCount = await User.countDocuments(filter);
+
+    res.json({
+      profiles,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+        totalCount,
+        hasNextPage: skip + profiles.length < totalCount,
+        hasPrevPage: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error('Get all profiles error:', error);
+    res.status(500).json({ message: 'Failed to fetch profiles' });
+  }
+};
+
 module.exports = {
   updateUser,
   deleteUser,
   getProfile,
   updateProfile,
-  updateProfilePicture
+  updateProfilePicture,
+  getProfileById,
+  getAllProfiles
 };
