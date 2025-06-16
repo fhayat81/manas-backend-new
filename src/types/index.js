@@ -23,7 +23,7 @@ const Education = Object.freeze({
 /**
  * @typedef {Object} Location
  * @property {string} city
- * @property {string} country
+ * @property {string} state
  */
 
 /**

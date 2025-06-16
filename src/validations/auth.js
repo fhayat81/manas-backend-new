@@ -23,7 +23,7 @@ const registerSchema = z.object({
   brief_personal_description: z.string().optional(),
   location: z.object({
     city: z.string(),
-    country: z.string(),
+    state: z.string(),
   }),
   children_count: z.number().min(0),
 });
@@ -60,7 +60,7 @@ const updateProfileSchema = z.object({
   brief_personal_description: z.string().optional(),
   location: z.object({
     city: z.string().optional(),
-    country: z.string().optional(),
+    state: z.string().optional(),
   }).optional(),
   children_count: z.number().min(0).optional(),
   profile_photo: z.string().optional(),

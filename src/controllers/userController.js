@@ -144,7 +144,7 @@ const updateProfile = async (req, res) => {
       });
       user.location = {
         city: updateData.location.city || (user.location && user.location.city),
-        country: updateData.location.country || (user.location && user.location.country)
+        state: updateData.location.state || (user.location && user.location.state)
       };
       hasUpdates = true;
     }
@@ -257,9 +257,16 @@ const getAllProfiles = async (req, res) => {
       _id: { $ne: currentUserId } // Exclude current user
     };
 
-    // Location filter
+    // Location filter - Smart filtering for state and city
     if (location) {
-      filter['location.city'] = { $regex: location, $options: 'i' };
+      const locationSearch = location.toLowerCase().trim();
+      const locationRegex = { $regex: locationSearch, $options: 'i' };
+      
+      // Search in both state and city
+      filter.$or = [
+        { 'location.state': locationRegex },
+        { 'location.city': locationRegex }
+      ];
     }
 
     // Age range filter
@@ -310,14 +317,25 @@ const getAllProfiles = async (req, res) => {
     // Search filter (searches across multiple fields)
     if (search) {
       const searchRegex = { $regex: search, $options: 'i' };
-      filter.$or = [
+      const searchOr = [
         { full_name: searchRegex },
         { profession: searchRegex },
         { interests_hobbies: searchRegex },
         { brief_personal_description: searchRegex },
         { 'location.city': searchRegex },
-        { 'location.country': searchRegex }
+        { 'location.state': searchRegex }
       ];
+      
+      // If we already have location filter, combine with AND
+      if (filter.$or) {
+        filter.$and = [
+          { $or: filter.$or },
+          { $or: searchOr }
+        ];
+        delete filter.$or;
+      } else {
+        filter.$or = searchOr;
+      }
     }
 
     // Calculate pagination
