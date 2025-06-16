@@ -264,11 +264,26 @@ const getAllProfiles = async (req, res) => {
 
     // Age range filter
     if (ageRange) {
-      const [minAge, maxAge] = ageRange.split('-').map(Number);
-      if (maxAge) {
-        filter.age = { $gte: minAge, $lte: maxAge };
+      if (ageRange.includes('+')) {
+        // Handle "46+" format
+        const minAge = parseInt(ageRange.replace('+', ''));
+        if (!isNaN(minAge)) {
+          filter.age = { $gte: minAge };
+        }
+      } else if (ageRange.includes('-')) {
+        // Handle "18-25" format
+        const [minAge, maxAge] = ageRange.split('-').map(Number);
+        if (!isNaN(minAge) && !isNaN(maxAge)) {
+          filter.age = { $gte: minAge, $lte: maxAge };
+        } else if (!isNaN(minAge)) {
+          filter.age = { $gte: minAge };
+        }
       } else {
-        filter.age = { $gte: minAge };
+        // Handle single age
+        const age = parseInt(ageRange);
+        if (!isNaN(age)) {
+          filter.age = { $gte: age };
+        }
       }
     }
 
