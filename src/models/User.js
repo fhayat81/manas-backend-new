@@ -78,7 +78,15 @@ const userSchema = new Schema({
   is_verified: {
     type: Boolean,
     default: false
-  }
+  },
+  expressed_interests: [{
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    sentAt: { type: Date, default: Date.now }
+  }],
+  received_interests: [{
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    sentAt: { type: Date, default: Date.now }
+  }]
 }, {
   timestamps: {
     createdAt: 'created_at',

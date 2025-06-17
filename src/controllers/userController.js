@@ -51,7 +51,11 @@ const deleteUser = async (req, res) => {
 // Get Profile
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
+    const user = await User.findById(req.user._id)
+      .select('-password')
+      .populate('expressed_interests.user', 'full_name profile_photo')
+      .populate('received_interests.user', 'full_name profile_photo');
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -367,12 +371,85 @@ const getAllProfiles = async (req, res) => {
   }
 };
 
+const expressInterest = async (req, res) => {
+  try {
+    const { targetUserId } = req.body;
+    const currentUserId = req.user._id;
+
+    if (!targetUserId) {
+      return res.status(400).json({ message: 'Target user ID is required.' });
+    }
+
+    if (currentUserId.toString() === targetUserId.toString()) {
+      return res.status(400).json({ message: 'Cannot express interest in yourself.' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Check if already expressed
+    const alreadyExpressed = currentUser.expressed_interests.some(
+      (entry) => entry.user && entry.user.toString() === targetUserId
+    );
+    if (!alreadyExpressed) {
+      currentUser.expressed_interests.push({ user: targetUserId, sentAt: new Date() });
+      await currentUser.save();
+    }
+
+    // Check if already received
+    const alreadyReceived = targetUser.received_interests.some(
+      (entry) => entry.user && entry.user.toString() === currentUserId
+    );
+    if (!alreadyReceived) {
+      targetUser.received_interests.push({ user: currentUserId, sentAt: new Date() });
+      await targetUser.save();
+    }
+
+    res.status(200).json({ message: 'Interest expressed successfully!' });
+  } catch (error) {
+    console.error('Error expressing interest:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const removeInterest = async (req, res) => {
+  try {
+    const { targetUserId } = req.body;
+    const currentUserId = req.user._id;
+
+    if (!targetUserId) {
+      return res.status(400).json({ message: 'Target user ID is required.' });
+    }
+
+    // Remove from current user's expressed_interests
+    await User.findByIdAndUpdate(currentUserId, {
+      $pull: { expressed_interests: { user: targetUserId } }
+    });
+
+    // Remove from target user's received_interests
+    await User.findByIdAndUpdate(targetUserId, {
+      $pull: { received_interests: { user: currentUserId } }
+    });
+
+    res.status(200).json({ message: 'Interest removed successfully!' });
+  } catch (error) {
+    console.error('Error removing interest:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   updateUser,
   deleteUser,
   getProfile,
   updateProfile,
   updateProfilePicture,
+  getAllProfiles,
   getProfileById,
-  getAllProfiles
+  expressInterest,
+  removeInterest
 };
