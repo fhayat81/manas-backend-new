@@ -81,7 +81,82 @@ const sendPasswordResetEmail = async (email, resetToken) => {
   }
 };
 
+const sendInterestMatchEmail = async (user1, user2) => {
+  const transporter = await createTransporter();
+
+  // Email for user1
+  const mailOptions1 = {
+    from: process.env.SMTP_USER,
+    to: user1.email,
+    subject: 'Interest Match - Contact Information',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">🎉 Interest Match!</h2>
+        <p>Great news! Your interest in <strong>${user2.full_name}</strong> has been accepted!</p>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #4CAF50; margin-top: 0;">Contact Information</h3>
+          <p><strong>Name:</strong> ${user2.full_name}</p>
+          <p><strong>Email:</strong> ${user2.email}</p>
+          <p><strong>Phone:</strong> ${user2.phone_number}</p>
+          <p><strong>Age:</strong> ${user2.age} years</p>
+          <p><strong>Location:</strong> ${user2.location.city}, ${user2.location.state}</p>
+          <p><strong>Profession:</strong> ${user2.profession}</p>
+          ${user2.interests_hobbies ? `<p><strong>Interests:</strong> ${user2.interests_hobbies}</p>` : ''}
+          ${user2.brief_personal_description ? `<p><strong>About:</strong> ${user2.brief_personal_description}</p>` : ''}
+        </div>
+        
+        <p>You can now contact them directly to take your relationship forward!</p>
+        <p>Best wishes,<br>The Manas Team</p>
+        
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+        <p style="color: #666; font-size: 12px;">This is an automated message, please do not reply.</p>
+      </div>
+    `
+  };
+
+  // Email for user2
+  const mailOptions2 = {
+    from: process.env.SMTP_USER,
+    to: user2.email,
+    subject: 'Interest Match - Contact Information',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">🎉 Interest Match!</h2>
+        <p>Great news! You have accepted <strong>${user1.full_name}</strong>'s interest in your profile!</p>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #4CAF50; margin-top: 0;">Contact Information</h3>
+          <p><strong>Name:</strong> ${user1.full_name}</p>
+          <p><strong>Email:</strong> ${user1.email}</p>
+          <p><strong>Phone:</strong> ${user1.phone_number}</p>
+          <p><strong>Age:</strong> ${user1.age} years</p>
+          <p><strong>Location:</strong> ${user1.location.city}, ${user1.location.state}</p>
+          <p><strong>Profession:</strong> ${user1.profession}</p>
+          ${user1.interests_hobbies ? `<p><strong>Interests:</strong> ${user1.interests_hobbies}</p>` : ''}
+          ${user1.brief_personal_description ? `<p><strong>About:</strong> ${user1.brief_personal_description}</p>` : ''}
+        </div>
+        
+        <p>You can now contact them directly to take your relationship forward!</p>
+        <p>Best wishes,<br>The Manas Team</p>
+        
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+        <p style="color: #666; font-size: 12px;">This is an automated message, please do not reply.</p>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions1);
+    await transporter.sendMail(mailOptions2);
+  } catch (error) {
+    console.error('Error sending interest match emails:', error);
+    throw new Error('Failed to send interest match emails');
+  }
+};
+
 module.exports = {
   sendOTPEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendInterestMatchEmail
 };

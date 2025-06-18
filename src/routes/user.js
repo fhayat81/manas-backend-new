@@ -1,5 +1,5 @@
 const express = require('express');
-const { getProfile, updateProfile, updateProfilePicture, getAllProfiles, getProfileById, expressInterest, removeInterest } = require('../controllers/userController.js');
+const { getProfile, updateProfile, updateProfilePicture, getAllProfiles, getProfileById, expressInterest, removeInterest, acceptInterest, rejectInterest } = require('../controllers/userController.js');
 const { authenticate } = require('../middleware/auth.js');
 const { validateProfileUpdate } = require('../validations/auth.js');
 
@@ -9,8 +9,10 @@ router.get('/profile', authenticate, getProfile);
 router.get('/profiles', authenticate, getAllProfiles);
 router.get('/profile/:id', authenticate, getProfileById);
 router.put('/profile', authenticate, validateProfileUpdate, updateProfile);
-router.post('/profile/photo', authenticate, updateProfilePicture);
+router.put('/profile/picture', authenticate, updateProfilePicture);
 router.post('/express-interest', authenticate, expressInterest);
-router.post('/remove-interest', authenticate, removeInterest);
+router.post('/accept-interest', authenticate, acceptInterest);
+router.post('/reject-interest', authenticate, rejectInterest);
+router.delete('/remove-interest', authenticate, removeInterest);
 
 module.exports = router;

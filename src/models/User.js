@@ -81,11 +81,21 @@ const userSchema = new Schema({
   },
   expressed_interests: [{
     user: { type: Schema.Types.ObjectId, ref: 'User' },
-    sentAt: { type: Date, default: Date.now }
+    sentAt: { type: Date, default: Date.now },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending'
+    }
   }],
   received_interests: [{
     user: { type: Schema.Types.ObjectId, ref: 'User' },
-    sentAt: { type: Date, default: Date.now }
+    sentAt: { type: Date, default: Date.now },
+    status: { 
+      type: String, 
+      enum: ['pending', 'accepted', 'rejected'], 
+      default: 'pending' 
+    }
   }]
 }, {
   timestamps: {

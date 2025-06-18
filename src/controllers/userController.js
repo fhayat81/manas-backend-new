@@ -1,5 +1,6 @@
 const { User } = require('../models/User.js');
 const { updateUserSchema } = require('../validations/auth.js');
+const { sendInterestMatchEmail } = require('../services/emailService.js');
 
 // Update User
 const updateUser = async (req, res) => {
@@ -391,27 +392,117 @@ const expressInterest = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Check if already expressed
-    const alreadyExpressed = currentUser.expressed_interests.some(
-      (entry) => entry.user && entry.user.toString() === targetUserId
-    );
-    if (!alreadyExpressed) {
-      currentUser.expressed_interests.push({ user: targetUserId, sentAt: new Date() });
-      await currentUser.save();
-    }
+    // Remove any existing interest between these users (both directions)
+    await User.findByIdAndUpdate(currentUserId, {
+      $pull: {
+        expressed_interests: { user: targetUserId },
+        received_interests: { user: targetUserId }
+      }
+    });
+    await User.findByIdAndUpdate(targetUserId, {
+      $pull: {
+        expressed_interests: { user: currentUserId },
+        received_interests: { user: currentUserId }
+      }
+    });
 
-    // Check if already received
-    const alreadyReceived = targetUser.received_interests.some(
-      (entry) => entry.user && entry.user.toString() === currentUserId
-    );
-    if (!alreadyReceived) {
-      targetUser.received_interests.push({ user: currentUserId, sentAt: new Date() });
-      await targetUser.save();
-    }
+    // Add new interest
+    currentUser.expressed_interests.push({ user: targetUserId, sentAt: new Date(), status: 'pending' });
+    await currentUser.save();
+    targetUser.received_interests.push({ user: currentUserId, sentAt: new Date(), status: 'pending' });
+    await targetUser.save();
 
     res.status(200).json({ message: 'Interest expressed successfully!' });
   } catch (error) {
     console.error('Error expressing interest:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const acceptInterest = async (req, res) => {
+  try {
+    const { targetUserId } = req.body;
+    const currentUserId = req.user._id;
+
+    if (!targetUserId) {
+      return res.status(400).json({ message: 'Target user ID is required.' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Update the received interest status to accepted
+    await User.findByIdAndUpdate(currentUserId, {
+      $set: { 
+        'received_interests.$[elem].status': 'accepted' 
+      }
+    }, {
+      arrayFilters: [{ 'elem.user': targetUserId }]
+    });
+    // Update the expressed interest status to accepted for the sender
+    await User.findByIdAndUpdate(targetUserId, {
+      $set: {
+        'expressed_interests.$[elem].status': 'accepted'
+      }
+    }, {
+      arrayFilters: [{ 'elem.user': currentUserId }]
+    });
+
+    // Send emails to both users with contact information
+    try {
+      await sendInterestMatchEmail(targetUser, currentUser);
+    } catch (emailError) {
+      console.error('Error sending match emails:', emailError);
+      // Don't fail the request if email fails
+    }
+
+    res.status(200).json({ message: 'Interest accepted! Contact information has been shared with both users.' });
+  } catch (error) {
+    console.error('Error accepting interest:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const rejectInterest = async (req, res) => {
+  try {
+    const { targetUserId } = req.body;
+    const currentUserId = req.user._id;
+
+    if (!targetUserId) {
+      return res.status(400).json({ message: 'Target user ID is required.' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Update the received interest status to rejected
+    await User.findByIdAndUpdate(currentUserId, {
+      $set: { 
+        'received_interests.$[elem].status': 'rejected' 
+      }
+    }, {
+      arrayFilters: [{ 'elem.user': targetUserId }]
+    });
+    // Update the expressed interest status to rejected for the sender
+    await User.findByIdAndUpdate(targetUserId, {
+      $set: {
+        'expressed_interests.$[elem].status': 'rejected'
+      }
+    }, {
+      arrayFilters: [{ 'elem.user': currentUserId }]
+    });
+
+    res.status(200).json({ message: 'Interest rejected successfully.' });
+  } catch (error) {
+    console.error('Error rejecting interest:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -451,5 +542,7 @@ module.exports = {
   getAllProfiles,
   getProfileById,
   expressInterest,
-  removeInterest
+  removeInterest,
+  acceptInterest,
+  rejectInterest
 };
