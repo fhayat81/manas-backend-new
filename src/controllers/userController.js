@@ -243,14 +243,14 @@ const getProfileById = async (req, res) => {
 const getAllProfiles = async (req, res) => {
   try {
     const currentUserId = req.user._id;
-    
+    const currentUserGender = req.user.gender;
     // Get query parameters for filtering
     const { 
       location, 
       ageRange, 
       profession, 
       search,
-      gender,
+      gender, // keep for other filters, but will override below
       marital_status,
       education,
       limit = 50,
@@ -262,11 +262,17 @@ const getAllProfiles = async (req, res) => {
       _id: { $ne: currentUserId } // Exclude current user
     };
 
+    // Gender constraint: male sees only female, female sees only male
+    if (currentUserGender === 'male') {
+      filter.gender = 'female';
+    } else if (currentUserGender === 'female') {
+      filter.gender = 'male';
+    }
+
     // Location filter - Smart filtering for state and city
     if (location) {
       const locationSearch = location.toLowerCase().trim();
       const locationRegex = { $regex: locationSearch, $options: 'i' };
-      
       // Search in both state and city
       filter.$or = [
         { 'location.state': locationRegex },
@@ -304,11 +310,6 @@ const getAllProfiles = async (req, res) => {
       filter.profession = { $regex: profession, $options: 'i' };
     }
 
-    // Gender filter
-    if (gender) {
-      filter.gender = gender;
-    }
-
     // Marital status filter
     if (marital_status) {
       filter.marital_status = marital_status;
@@ -330,7 +331,6 @@ const getAllProfiles = async (req, res) => {
         { 'location.city': searchRegex },
         { 'location.state': searchRegex }
       ];
-      
       // If we already have location filter, combine with AND
       if (filter.$or) {
         filter.$and = [
