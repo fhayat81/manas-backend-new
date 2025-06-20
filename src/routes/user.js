@@ -22,4 +22,6 @@ router.get('/achievement-cards', cardsController.getAchievementCards);
 router.get('/success-stories', cardsController.getSuccessStories);
 router.get('/media-cards', cardsController.getMediaCards);
 
+router.post('/contact', cardsController.contactFormHandler || require('../controllers/userController').contactFormHandler);
+
 module.exports = router;

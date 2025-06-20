@@ -155,8 +155,34 @@ const sendInterestMatchEmail = async (user1, user2) => {
   }
 };
 
+const sendContactMail = async ({ name, email, subject, message }) => {
+  const transporter = await createTransporter();
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: process.env.SMTP_USER,
+    subject: `Contact Form: ${subject}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong></p>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px;">${message}</div>
+      </div>
+    `
+  };
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error sending contact mail:', error);
+    throw new Error('Failed to send contact mail');
+  }
+};
+
 module.exports = {
   sendOTPEmail,
   sendPasswordResetEmail,
-  sendInterestMatchEmail
+  sendInterestMatchEmail,
+  sendContactMail
 };
