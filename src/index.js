@@ -21,6 +21,7 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'https://manas2.netlify.app', // Add your frontend domain here
+    'https://manas-admin.netlify.app',
     process.env.FRONTEND_URL
   ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

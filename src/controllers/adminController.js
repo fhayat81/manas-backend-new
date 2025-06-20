@@ -382,7 +382,7 @@ exports.getAllMediaCards = async (req, res) => {
 
 exports.createMediaCard = async (req, res) => {
   try {
-    const { title, date, source, description, imageUrl, link, detailedDescription } = req.body;
+    const { title, date, source, description, imageUrl, detailedDescription } = req.body;
     
     // Get the next available ID
     const lastCard = await MediaCard.findOne().sort({ id: -1 });
@@ -395,7 +395,6 @@ exports.createMediaCard = async (req, res) => {
       source,
       description,
       imageUrl,
-      link,
       detailedDescription
     });
     
@@ -409,11 +408,11 @@ exports.createMediaCard = async (req, res) => {
 
 exports.updateMediaCard = async (req, res) => {
   try {
-    const { title, date, source, description, imageUrl, link, detailedDescription } = req.body;
+    const { title, date, source, description, imageUrl, detailedDescription } = req.body;
     
     const card = await MediaCard.findByIdAndUpdate(
       req.params.id,
-      { title, date, source, description, imageUrl, link, detailedDescription },
+      { title, date, source, description, imageUrl, detailedDescription },
       { new: true }
     );
     
