@@ -3,6 +3,7 @@ const { getProfile, updateProfile, updateProfilePicture, getAllProfiles, getProf
 const { authenticate } = require('../middleware/auth.js');
 const { validateProfileUpdate } = require('../validations/auth.js');
 const cardsController = require('../controllers/cardsController.js');
+const adminController = require('../controllers/adminController.js');
 
 const router = express.Router();
 
@@ -23,5 +24,9 @@ router.get('/success-stories', cardsController.getSuccessStories);
 router.get('/media-cards', cardsController.getMediaCards);
 
 router.post('/contact', cardsController.contactFormHandler || require('../controllers/userController').contactFormHandler);
+
+// Admin OTP endpoints
+router.post('/admin/send-otp', adminController.sendAdminOTP);
+router.post('/admin/verify-otp', adminController.verifyAdminOTP);
 
 module.exports = router;

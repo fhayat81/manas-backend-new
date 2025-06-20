@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const authRoutes = require('./routes/auth.js');
 const userRoutes = require('./routes/user.js');
+const adminRoutes = require('./routes/admin.js');
 const compression = require('compression');
 
 // Load environment variables
@@ -66,6 +67,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

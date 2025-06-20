@@ -11,8 +11,15 @@ const authenticate = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-    const user = await User.findById(decoded.userId).select('-password');
 
+    // Allow admin tokens to pass even if not in User collection
+    if (decoded.isAdmin) {
+      req.admin = { email: decoded.email, userId: decoded.userId };
+      return next();
+    }
+
+    // Regular user logic
+    const user = await User.findById(decoded.userId).select('-password');
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
