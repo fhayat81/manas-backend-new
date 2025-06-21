@@ -8,7 +8,7 @@ const { MediaCard } = require('../models/MediaCard.js');
 const { AdminUser } = require('../models/AdminUser.js');
 const { Event } = require('../models/Event.js');
 
-const ADMIN_EMAIL = 'manasfoundation2025@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'manasfoundation2025@gmail.com';
 const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 const otpStore = {};
 
@@ -83,7 +83,7 @@ exports.verifyAdminOTP = async (req, res) => {
       role: 'admin',
       isAdmin: true
     },
-    process.env.JWT_SECRET || '31b63c0000e0210e7b9048708d9f7c57809b220cf54195c02e75f599007a6ffd7face7681d9b927fc70964aac9fa2dc5c5227d153e063e7a264ca10107e702d6',
+    process.env.JWT_SECRET,
     { expiresIn: '5h' }
   );
 

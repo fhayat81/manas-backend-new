@@ -10,7 +10,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Allow admin tokens to pass even if not in User collection
     if (decoded.isAdmin) {
