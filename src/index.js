@@ -20,8 +20,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 // CORS configuration - allow frontend domain
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL,
-    process.env.ADMIN_URL,
+    "https://manas-admin.netlify.app",
+    "https://manas2.netlify.app/",
   ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
