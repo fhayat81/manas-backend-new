@@ -19,11 +19,43 @@ const Education = Object.freeze({
   PHD: "phd"
 });
 
+const Religion = Object.freeze({
+  HINDU: "hindu",
+  MUSLIM: "muslim",
+  CHRISTIAN: "christian",
+  SIKH: "sikh",
+  BUDDHIST: "buddhist",
+  JAIN: "jain",
+  OTHER: "other"
+});
+
+const Caste = Object.freeze({
+  GENERAL: "general",
+  OBC: "obc",
+  SC: "sc",
+  ST: "st",
+  OTHER: "other"
+});
+
 // JSDoc type hints (optional, for editor intellisense)
 /**
  * @typedef {Object} Location
- * @property {string} city
+ * @property {string} village
+ * @property {string} tehsil
+ * @property {string} district
  * @property {string} state
+ */
+
+/**
+ * @typedef {Object} Child
+ * @property {string} gender - "boy" or "girl"
+ * @property {number} age
+ */
+
+/**
+ * @typedef {Object} Guardian
+ * @property {string} name
+ * @property {string} contact
  */
 
 /**
@@ -32,7 +64,7 @@ const Education = Object.freeze({
  * @property {string} email
  * @property {string} password
  * @property {string} [profile_photo]
- * @property {number} age
+ * @property {Date} date_of_birth
  * @property {string} gender
  * @property {string} marital_status
  * @property {string} education
@@ -42,6 +74,11 @@ const Education = Object.freeze({
  * @property {string} [brief_personal_description]
  * @property {Location} location
  * @property {number} children_count
+ * @property {Guardian} guardian
+ * @property {string} caste
+ * @property {string} religion
+ * @property {boolean} [divorce_finalized]
+ * @property {Child[]} [children]
  * @property {boolean} is_verified
  * @property {Date} created_at
  * @property {Date} updated_at
@@ -64,6 +101,8 @@ const Education = Object.freeze({
 module.exports = {
   Gender,
   MaritalStatus,
-  Education
+  Education,
+  Religion,
+  Caste
   // Interfaces are just for documentation in JS, not exported
 };

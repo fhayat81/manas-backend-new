@@ -83,73 +83,67 @@ const updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update user fields
     const updateData = req.body;
-    
-    // Check if updateData is empty
     if (!updateData || Object.keys(updateData).length === 0) {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
     // Handle profile photo if present
     if (updateData.profile_photo !== undefined) {
-      console.log('Updating profile photo:', {
-        type: typeof updateData.profile_photo,
-        isBuffer: Buffer.isBuffer(updateData.profile_photo),
-        isString: typeof updateData.profile_photo === 'string',
-        isEmpty: updateData.profile_photo === ''
-      });
-
       if (updateData.profile_photo === '') {
-        // Remove profile photo
         user.profile_photo = undefined;
       } else if (typeof updateData.profile_photo === 'string' && updateData.profile_photo.startsWith('data:')) {
-        // Store base64 string directly
         user.profile_photo = updateData.profile_photo;
       } else if (Buffer.isBuffer(updateData.profile_photo)) {
-        // Convert buffer to base64
         user.profile_photo = `data:image/jpeg;base64,${updateData.profile_photo.toString('base64')}`;
       } else {
         return res.status(400).json({ message: 'Invalid profile photo format' });
       }
     }
 
-    // Update fields if present
+    // Update all simple fields
     const fieldsToUpdate = [
       'full_name',
       'email',
-      'age',
+      'date_of_birth',
       'gender',
       'marital_status',
       'education',
-      'children_count',
       'profession',
       'phone_number',
       'interests_hobbies',
-      'brief_personal_description'
+      'brief_personal_description',
+      'caste',
+      'religion',
+      'divorce_finalized',
+      'children',
+      'children_count',
+      'is_verified'
     ];
-
     let hasUpdates = false;
     fieldsToUpdate.forEach(field => {
       if (updateData[field] !== undefined) {
-        console.log(`Updating ${field}:`, {
-          old: user[field],
-          new: updateData[field]
-        });
         user[field] = updateData[field];
         hasUpdates = true;
       }
     });
-    
+
     // Update location if present
     if (updateData.location) {
-      console.log('Updating location:', {
-        old: user.location,
-        new: updateData.location
-      });
       user.location = {
-        city: updateData.location.city || (user.location && user.location.city),
-        state: updateData.location.state || (user.location && user.location.state)
+        village: updateData.location.village !== undefined ? updateData.location.village : (user.location?.village || ''),
+        tehsil: updateData.location.tehsil !== undefined ? updateData.location.tehsil : (user.location?.tehsil || ''),
+        district: updateData.location.district !== undefined ? updateData.location.district : (user.location?.district || ''),
+        state: updateData.location.state !== undefined ? updateData.location.state : (user.location?.state || ''),
+      };
+      hasUpdates = true;
+    }
+
+    // Update guardian if present
+    if (updateData.guardian) {
+      user.guardian = {
+        name: updateData.guardian.name !== undefined ? updateData.guardian.name : (user.guardian?.name || ''),
+        contact: updateData.guardian.contact !== undefined ? updateData.guardian.contact : (user.guardian?.contact || ''),
       };
       hasUpdates = true;
     }
@@ -159,26 +153,20 @@ const updateProfile = async (req, res) => {
     }
 
     try {
-      console.log('Saving updated user data...');
       await user.save();
-      console.log('User data saved successfully');
     } catch (error) {
-      console.error('Error saving user data:', error);
       if (error instanceof Error) {
         return res.status(400).json({ message: error.message });
       }
       return res.status(500).json({ message: 'Error saving user data' });
     }
-    
-    // Return updated user without password
+
     const updatedUser = await User.findById(userId).select('-password');
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found after update' });
     }
-    console.log('Profile update completed successfully');
     res.json(updatedUser);
   } catch (error) {
-    console.error('Update profile error:', error);
     if (error instanceof Error) {
       return res.status(400).json({ message: error.message });
     }

@@ -6,6 +6,7 @@ const multer = require('multer');
 const authRoutes = require('./routes/auth.js');
 const userRoutes = require('./routes/user.js');
 const adminRoutes = require('./routes/admin.js');
+const volunteerRoutes = require('./routes/volunteer.js');
 const compression = require('compression');
 
 // Load environment variables
@@ -20,6 +21,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const corsOptions = {
   origin: [
     'http://localhost:3000',
+    'http://localhost:3001',
     'https://manas2.netlify.app', // Add your frontend domain here
     'https://manas-admin.netlify.app',
     process.env.FRONTEND_URL
@@ -69,6 +71,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/volunteer', volunteerRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -1,12 +1,12 @@
 const { z } = require('zod');
-const { Gender, MaritalStatus, Education } = require('../types');
+const { Gender, MaritalStatus, Education, Religion, Caste } = require('../types');
 
 const registerSchema = z.object({
   full_name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
   profile_photo: z.string().optional(),
-  age: z.number().min(18),
+  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.string().datetime()).or(z.date()),
   gender: z.enum([Gender.MALE, Gender.FEMALE]),
   marital_status: z.enum([MaritalStatus.DIVORCEE, MaritalStatus.WIDOW, MaritalStatus.SINGLE]),
   education: z.enum([
@@ -22,9 +22,22 @@ const registerSchema = z.object({
   interests_hobbies: z.string().optional(),
   brief_personal_description: z.string().optional(),
   location: z.object({
-    city: z.string(),
-    state: z.string(),
+    village: z.string().min(1),
+    tehsil: z.string().min(1),
+    district: z.string().min(1),
+    state: z.string().min(1),
   }),
+  guardian: z.object({
+    name: z.string().min(1),
+    contact: z.string().min(1),
+  }),
+  caste: z.enum([Caste.GENERAL, Caste.OBC, Caste.SC, Caste.ST, Caste.OTHER]),
+  religion: z.enum([Religion.HINDU, Religion.MUSLIM, Religion.CHRISTIAN, Religion.SIKH, Religion.BUDDHIST, Religion.JAIN, Religion.OTHER]),
+  divorce_finalized: z.boolean().optional(),
+  children: z.array(z.object({
+    gender: z.enum(['boy', 'girl']),
+    age: z.number().min(0),
+  })).optional(),
   children_count: z.number().min(0),
 });
 
@@ -43,7 +56,7 @@ const updateUserSchema = registerSchema.partial();
 const updateProfileSchema = z.object({
   full_name: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  age: z.number().min(18).optional(),
+  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.string().datetime()).or(z.date()).optional(),
   gender: z.enum([Gender.MALE, Gender.FEMALE]).optional(),
   marital_status: z.enum([MaritalStatus.DIVORCEE, MaritalStatus.WIDOW, MaritalStatus.SINGLE]).optional(),
   education: z.enum([
@@ -59,9 +72,22 @@ const updateProfileSchema = z.object({
   interests_hobbies: z.string().optional(),
   brief_personal_description: z.string().optional(),
   location: z.object({
-    city: z.string().optional(),
-    state: z.string().optional(),
+    village: z.string().min(1).optional(),
+    tehsil: z.string().min(1).optional(),
+    district: z.string().min(1).optional(),
+    state: z.string().min(1).optional(),
   }).optional(),
+  guardian: z.object({
+    name: z.string().min(1).optional(),
+    contact: z.string().min(1).optional(),
+  }).optional(),
+  caste: z.enum([Caste.GENERAL, Caste.OBC, Caste.SC, Caste.ST, Caste.OTHER]).optional(),
+  religion: z.enum([Religion.HINDU, Religion.MUSLIM, Religion.CHRISTIAN, Religion.SIKH, Religion.BUDDHIST, Religion.JAIN, Religion.OTHER]).optional(),
+  divorce_finalized: z.boolean().optional(),
+  children: z.array(z.object({
+    gender: z.enum(['boy', 'girl']),
+    age: z.number().min(0),
+  })).optional(),
   children_count: z.number().min(0).optional(),
   profile_photo: z.string().optional(),
 });

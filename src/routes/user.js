@@ -29,4 +29,6 @@ router.post('/contact', cardsController.contactFormHandler || require('../contro
 router.post('/admin/send-otp', adminController.sendAdminOTP);
 router.post('/admin/verify-otp', adminController.verifyAdminOTP);
 
+router.get('/events', adminController.getAllEvents);
+
 module.exports = router;

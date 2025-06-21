@@ -5,6 +5,8 @@ const { Schema } = mongoose;
 const GENDERS = ['male', 'female'];
 const MARITAL_STATUSES = ['divorcee', 'widow', 'single'];
 const EDUCATIONS = ['none', 'primary school', 'high school', 'bachelor\'s', 'master\'s', 'phd'];
+const RELIGIONS = ['hindu', 'muslim', 'christian', 'sikh', 'buddhist', 'jain', 'other'];
+const CASTES = ['general', 'obc', 'sc', 'st', 'other'];
 
 // Adjust these arrays above to match your actual allowed values if needed
 
@@ -25,10 +27,9 @@ const userSchema = new Schema({
   profile_photo: {
     type: String
   },
-  age: {
-    type: Number,
-    required: true,
-    min: 18
+  date_of_birth: {
+    type: Date,
+    required: true
   },
   gender: {
     type: String,
@@ -60,7 +61,15 @@ const userSchema = new Schema({
     type: String
   },
   location: {
-    city: {
+    village: {
+      type: String,
+      required: true
+    },
+    tehsil: {
+      type: String,
+      required: true
+    },
+    district: {
       type: String,
       required: true
     },
@@ -69,6 +78,41 @@ const userSchema = new Schema({
       required: true
     }
   },
+  guardian: {
+    name: {
+      type: String,
+      required: true
+    },
+    contact: {
+      type: String,
+      required: true
+    }
+  },
+  caste: {
+    type: String,
+    enum: CASTES,
+    required: true
+  },
+  religion: {
+    type: String,
+    enum: RELIGIONS,
+    required: true
+  },
+  divorce_finalized: {
+    type: Boolean
+  },
+  children: [{
+    gender: {
+      type: String,
+      enum: ['boy', 'girl'],
+      required: true
+    },
+    age: {
+      type: Number,
+      required: true,
+      min: 0
+    }
+  }],
   children_count: {
     type: Number,
     required: true,
@@ -91,19 +135,14 @@ const userSchema = new Schema({
   received_interests: [{
     user: { type: Schema.Types.ObjectId, ref: 'User' },
     sentAt: { type: Date, default: Date.now },
-    status: { 
-      type: String, 
-      enum: ['pending', 'accepted', 'rejected'], 
-      default: 'pending' 
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending'
     }
   }]
 }, {
-  timestamps: {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-  }
+  timestamps: true
 });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = { User };
+module.exports = { User: mongoose.model('User', userSchema) };

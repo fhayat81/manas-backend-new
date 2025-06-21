@@ -8,7 +8,7 @@ const { MediaCard } = require('../models/MediaCard.js');
 const { AdminUser } = require('../models/AdminUser.js');
 const { Event } = require('../models/Event.js');
 
-const ADMIN_EMAIL = 'fazalhayatkhan.iitkgp@gmail.com';
+const ADMIN_EMAIL = 'manasfoundation2025@gmail.com';
 const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 const otpStore = {};
 

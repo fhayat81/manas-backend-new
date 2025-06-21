@@ -13,7 +13,7 @@ const register = async (req, res) => {
       email,
       password,
       profile_photo,
-      age,
+      date_of_birth,
       gender,
       marital_status,
       education,
@@ -22,18 +22,28 @@ const register = async (req, res) => {
       interests_hobbies,
       brief_personal_description,
       location,
+      guardian,
+      caste,
+      religion,
+      divorce_finalized,
+      children,
       children_count
     } = req.body;
 
     console.log('Registration attempt:', {
       email,
-      age,
+      date_of_birth,
       gender,
       marital_status,
       education,
       profession,
       phone_number,
       location,
+      guardian,
+      caste,
+      religion,
+      divorce_finalized,
+      children,
       children_count
     });
 
@@ -55,7 +65,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       profile_photo,
-      age,
+      date_of_birth: new Date(date_of_birth),
       gender,
       marital_status,
       education,
@@ -64,6 +74,11 @@ const register = async (req, res) => {
       interests_hobbies,
       brief_personal_description,
       location,
+      guardian,
+      caste,
+      religion,
+      divorce_finalized,
+      children,
       children_count,
       is_verified: false
     });

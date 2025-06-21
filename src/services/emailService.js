@@ -84,6 +84,13 @@ const sendPasswordResetEmail = async (email, resetToken) => {
 const sendInterestMatchEmail = async (user1, user2) => {
   const transporter = await createTransporter();
 
+  // Helper to format location
+  const formatLocation = (loc) => {
+    if (!loc) return '';
+    const parts = [loc.village, loc.tehsil, loc.district, loc.state].filter(Boolean);
+    return parts.join(', ');
+  };
+
   // Email for user1
   const mailOptions1 = {
     from: process.env.SMTP_USER,
@@ -99,9 +106,11 @@ const sendInterestMatchEmail = async (user1, user2) => {
           <p><strong>Name:</strong> ${user2.full_name}</p>
           <p><strong>Email:</strong> ${user2.email}</p>
           <p><strong>Phone:</strong> ${user2.phone_number}</p>
-          <p><strong>Age:</strong> ${user2.age} years</p>
-          <p><strong>Location:</strong> ${user2.location.city}, ${user2.location.state}</p>
+          <p><strong>Date of Birth:</strong> ${user2.date_of_birth ? new Date(user2.date_of_birth).toLocaleDateString() : ''}</p>
+          <p><strong>Location:</strong> ${formatLocation(user2.location)}</p>
           <p><strong>Profession:</strong> ${user2.profession}</p>
+          ${user2.guardian && user2.guardian.name ? `<p><strong>Guardian Name:</strong> ${user2.guardian.name}</p>` : ''}
+          ${user2.guardian && user2.guardian.contact ? `<p><strong>Guardian Contact:</strong> ${user2.guardian.contact}</p>` : ''}
           ${user2.interests_hobbies ? `<p><strong>Interests:</strong> ${user2.interests_hobbies}</p>` : ''}
           ${user2.brief_personal_description ? `<p><strong>About:</strong> ${user2.brief_personal_description}</p>` : ''}
         </div>
@@ -130,9 +139,11 @@ const sendInterestMatchEmail = async (user1, user2) => {
           <p><strong>Name:</strong> ${user1.full_name}</p>
           <p><strong>Email:</strong> ${user1.email}</p>
           <p><strong>Phone:</strong> ${user1.phone_number}</p>
-          <p><strong>Age:</strong> ${user1.age} years</p>
-          <p><strong>Location:</strong> ${user1.location.city}, ${user1.location.state}</p>
+          <p><strong>Date of Birth:</strong> ${user1.date_of_birth ? new Date(user1.date_of_birth).toLocaleDateString() : ''}</p>
+          <p><strong>Location:</strong> ${formatLocation(user1.location)}</p>
           <p><strong>Profession:</strong> ${user1.profession}</p>
+          ${user1.guardian && user1.guardian.name ? `<p><strong>Guardian Name:</strong> ${user1.guardian.name}</p>` : ''}
+          ${user1.guardian && user1.guardian.contact ? `<p><strong>Guardian Contact:</strong> ${user1.guardian.contact}</p>` : ''}
           ${user1.interests_hobbies ? `<p><strong>Interests:</strong> ${user1.interests_hobbies}</p>` : ''}
           ${user1.brief_personal_description ? `<p><strong>About:</strong> ${user1.brief_personal_description}</p>` : ''}
         </div>
