@@ -234,6 +234,7 @@ const getAllProfiles = async (req, res) => {
     const currentUserGender = req.user.gender;
     // Get query parameters for filtering
     const { 
+      name,
       location, 
       yearOfBirthFrom, 
       yearOfBirthTo, 
@@ -256,6 +257,11 @@ const getAllProfiles = async (req, res) => {
       filter.gender = 'female';
     } else if (currentUserGender === 'female') {
       filter.gender = 'male';
+    }
+
+    // Name filter
+    if (name) {
+      filter.full_name = { $regex: name, $options: 'i' };
     }
 
     // Location filter - search across all location fields individually
