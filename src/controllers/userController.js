@@ -243,6 +243,8 @@ const getAllProfiles = async (req, res) => {
       gender, // keep for other filters, but will override below
       marital_status,
       education,
+      caste,
+      religion,
       limit = 50,
       page = 1
     } = req.query;
@@ -262,6 +264,16 @@ const getAllProfiles = async (req, res) => {
     // Name filter
     if (name) {
       filter.full_name = { $regex: name, $options: 'i' };
+    }
+
+    // Caste filter
+    if (caste) {
+      filter.caste = caste;
+    }
+
+    // Religion filter
+    if (religion) {
+      filter.religion = religion;
     }
 
     // Location filter - search across all location fields individually
