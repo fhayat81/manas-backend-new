@@ -235,7 +235,8 @@ const getAllProfiles = async (req, res) => {
     // Get query parameters for filtering
     const { 
       location, 
-      ageRange, 
+      yearOfBirthFrom, 
+      yearOfBirthTo, 
       profession, 
       search,
       gender, // keep for other filters, but will override below
@@ -257,38 +258,31 @@ const getAllProfiles = async (req, res) => {
       filter.gender = 'male';
     }
 
-    // Location filter - Smart filtering for state and city
+    // Location filter - search across all location fields individually
     if (location) {
       const locationSearch = location.toLowerCase().trim();
       const locationRegex = { $regex: locationSearch, $options: 'i' };
-      // Search in both state and city
       filter.$or = [
-        { 'location.state': locationRegex },
-        { 'location.city': locationRegex }
+        { 'location.village': locationRegex },
+        { 'location.tehsil': locationRegex },
+        { 'location.district': locationRegex },
+        { 'location.state': locationRegex }
       ];
     }
 
-    // Age range filter
-    if (ageRange) {
-      if (ageRange.includes('+')) {
-        // Handle "46+" format
-        const minAge = parseInt(ageRange.replace('+', ''));
-        if (!isNaN(minAge)) {
-          filter.age = { $gte: minAge };
+    // Year of birth range filter
+    if (yearOfBirthFrom || yearOfBirthTo) {
+      filter.date_of_birth = {};
+      if (yearOfBirthFrom) {
+        const fromYear = parseInt(yearOfBirthFrom);
+        if (!isNaN(fromYear)) {
+          filter.date_of_birth.$gte = new Date(`${fromYear}-01-01T00:00:00.000Z`);
         }
-      } else if (ageRange.includes('-')) {
-        // Handle "18-25" format
-        const [minAge, maxAge] = ageRange.split('-').map(Number);
-        if (!isNaN(minAge) && !isNaN(maxAge)) {
-          filter.age = { $gte: minAge, $lte: maxAge };
-        } else if (!isNaN(minAge)) {
-          filter.age = { $gte: minAge };
-        }
-      } else {
-        // Handle single age
-        const age = parseInt(ageRange);
-        if (!isNaN(age)) {
-          filter.age = { $gte: age };
+      }
+      if (yearOfBirthTo) {
+        const toYear = parseInt(yearOfBirthTo);
+        if (!isNaN(toYear)) {
+          filter.date_of_birth.$lte = new Date(`${toYear}-12-31T23:59:59.999Z`);
         }
       }
     }
