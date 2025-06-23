@@ -178,21 +178,17 @@ exports.getAllImpactCards = async (req, res) => {
 
 exports.createImpactCard = async (req, res) => {
   try {
-    const { title, description, imageUrl, link, detailedDescription } = req.body;
-    
+    const { title, description, imageUrl, detailedDescription } = req.body;
     // Get the next available ID
     const lastCard = await ImpactCard.findOne().sort({ id: -1 });
     const nextId = lastCard ? lastCard.id + 1 : 1;
-    
     const card = new ImpactCard({
       id: nextId,
       title,
       description,
       imageUrl,
-      link,
       detailedDescription
     });
-    
     await card.save();
     res.status(201).json(card);
   } catch (error) {
@@ -203,14 +199,12 @@ exports.createImpactCard = async (req, res) => {
 
 exports.updateImpactCard = async (req, res) => {
   try {
-    const { title, description, imageUrl, link, detailedDescription } = req.body;
-    
+    const { title, description, imageUrl, detailedDescription } = req.body;
     const card = await ImpactCard.findByIdAndUpdate(
       req.params.id,
-      { title, description, imageUrl, link, detailedDescription },
+      { title, description, imageUrl, detailedDescription },
       { new: true }
     );
-    
     if (!card) {
       return res.status(404).json({ message: 'Impact card not found' });
     }
