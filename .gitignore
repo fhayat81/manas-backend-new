@@ -26,9 +26,6 @@ Thumbs.db
 dist/
 build/
 
-# Vercel (just in case)
-.vercel/
-vercel.json
 
 # Misc
 coverage/
